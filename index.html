@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ilham Bday Party 🎂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1b3a57;
+    --blue: #46a7da;
+    --paper: #fffdf6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.25rem;
+    color: var(--ink);
+    background: #cdeefb;
+    transition: background-color 1s ease;
+    overflow: hidden;
+  }
+  /* tekstur kertas halus */
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image: radial-gradient(rgba(27,58,87,.08) 1px, transparent 1.2px);
+    background-size: 5px 5px;
+  }
+
+  /* ===== PANGGUNG (SVG) ===== */
+  #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+  .o { stroke: #1b3a57; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+  .ln { fill: none; }
+  .layer { transition: transform 1s cubic-bezier(.5,0,.2,1), opacity .8s ease; }
+  .bgl   { transition: opacity .8s ease; }
+  .layer.dim, .bgl.dim { opacity: 0; }
+
+  .flame { transform-box: fill-box; transform-origin: 50% 100%; transform: scale(0); transition: transform .5s cubic-bezier(.3,1.6,.5,1); }
+  .flame.on { transform: scale(1); animation: flick 1.4s ease-in-out .6s infinite alternate; }
+  @keyframes flick { to { transform: scale(1.05, 1.1); } }
+  #glow { opacity: 0; transition: opacity .8s ease; }
+  #glow.on { opacity: .4; }
+
+  /* ===== JUDUL ===== */
+  .hero {
+    position: fixed; z-index: 5; left: 0; right: 0; text-align: center; pointer-events: none;
+    top: calc(env(safe-area-inset-top) + 4vh);
+    transition: opacity .4s steps(4), transform .4s steps(4);
+  }
+  .hero.hide { opacity: 0; transform: translateY(-24px); }
+  .hero small { display: block; font-size: 1.15rem; margin-bottom: 2px; }
+  .hero h1 {
+    font-family: 'Fredoka', cursive; font-weight: 600; line-height: 1.02;
+    font-size: clamp(2.3rem, 10vw, 3.8rem);
+    text-shadow: 3px 3px 0 #fff;
+  }
+
+  /* ===== PANEL KERTAS ===== */
+  .panel {
+    position: fixed; z-index: 10; left: 50%;
+    bottom: calc(env(safe-area-inset-bottom) + 3vh);
+    width: min(92vw, 440px);
+    background: var(--paper); border: 3px solid var(--ink); border-radius: 14px;
+    padding: 22px 18px 18px; text-align: center;
+    box-shadow: 6px 6px 0 rgba(27,58,87,.28);
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transform: translate(-50%, 40px);
+    transition: opacity .35s steps(4), transform .35s steps(4), visibility 0s .35s;
+  }
+  .panel.show { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 0); transition-delay: 0s; }
+  .panel::before { /* selotip */
+    content: ''; position: absolute; top: -13px; left: 50%; width: 74px; height: 22px;
+    background: rgba(246,236,122,.95); border: 2px solid var(--ink);
+    transform: translateX(-50%) rotate(-3deg);
+  }
+  h2 { font-family: 'Fredoka', cursive; font-weight: 600; font-size: 1.6rem; line-height: 1.15; margin-bottom: 8px; }
+  p  { line-height: 1.3; margin-bottom: 14px; }
+  .row { display: flex; gap: 10px; }
+  .row .btn { flex: 1; }
+
+  .btn {
+    font-family: 'Fredoka', cursive; font-size: 1.1rem; color: var(--ink);
+    background: #fff; border: 3px solid var(--ink); border-radius: 10px;
+    padding: 12px 20px; cursor: pointer; box-shadow: 4px 4px 0 var(--ink);
+    transition: transform .1s steps(2), box-shadow .1s steps(2);
+  }
+  .btn.primary { background: var(--blue); color: #fff; width: 100%; }
+  .btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+
+  input[type="text"] {
+    width: 100%; padding: 12px; font-family: 'Patrick Hand', cursive; font-size: 1.3rem; color: var(--ink);
+    border: 3px solid var(--ink); border-radius: 8px; margin-bottom: 14px; text-align: center; background: #fff;
+  }
+  input.error { border-color: #d63031; animation: shake .3s steps(3); }
+  @keyframes shake { 0% { transform: translateX(-6px); } 50% { transform: translateX(6px); } 100% { transform: none; } }
+
+  .chip {
+    display: inline-block; max-width: 100%; word-break: break-word;
+    background: #fff; border: 2px dashed var(--ink); border-radius: 8px;
+    padding: 6px 14px; margin-bottom: 12px; font-family: 'Fredoka', cursive; font-size: 1.3rem; color: #1d6fa5;
+  }
+
+  .rundown { list-style: none; text-align: left; margin-bottom: 12px; }
+  .rundown li {
+    background: #fff; border: 2px solid var(--ink); border-radius: 8px; box-shadow: 3px 3px 0 var(--ink);
+    padding: 7px 10px; margin: 7px 3px; font-weight: bold;
+    opacity: 0; transform: translateX(-18px);
+  }
+  #p5.show .rundown li { animation: popIn .4s steps(4) forwards; }
+  #p5.show .rundown li:nth-child(1) { animation-delay: .15s; }
+  #p5.show .rundown li:nth-child(2) { animation-delay: .5s; }
+  #p5.show .rundown li:nth-child(3) { animation-delay: .85s; }
+  #p5.show .rundown li:nth-child(4) { animation-delay: 1.2s; }
+  @keyframes popIn { to { opacity: 1; transform: none; } }
+
+  /* ===== SPRINKLE ===== */
+  .spr { position: fixed; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; opacity: 0; transition: opacity .6s ease; }
+  .spr.on { opacity: 1; }
+  .spr span { position: absolute; top: -24px; border-radius: 3px; border: 1.5px solid var(--ink); animation: rain linear infinite; }
+  @keyframes rain { from { transform: translateY(0) rotate(0); } to { transform: translateY(115vh) rotate(var(--rot)); } }
+
+  /* ===== MUSIK ===== */
+  .music {
+    position: fixed; top: calc(env(safe-area-inset-top) + 10px); right: 10px; z-index: 20; display: none;
+    font-family: 'Patrick Hand', cursive; font-size: 1rem; color: var(--ink);
+    background: #fff; border: 2px solid var(--ink); border-radius: 20px; padding: 5px 12px;
+    box-shadow: 2px 2px 0 var(--ink); cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<audio id="bgm" src="lagu.mp3" loop preload="auto"></audio>
+<button class="music" id="musicBtn" type="button">🎵 Musik: On</button>
+
+<!-- ===================== PANGGUNG KUE ===================== -->
+<svg id="scene" viewBox="0 0 400 800" preserveAspectRatio="none" aria-hidden="true">
+  <defs>
+    <!-- krim piping -->
+    <g id="swirl">
+      <path class="o" d="M-15 6C-17 -5 -5 -12 5 -11C15 -10 19 -1 14 7C10 12 -3 14 -9 12C-12 11 -14 9 -15 6Z"/>
+      <path class="o ln" d="M-9 11C-8 2 -1 -6 9 -9"/>
+      <path class="o ln" d="M-2 12.5C-1 5 6 -2 15 -3"/>
+    </g>
+    <path id="star" d="M0 -9L2.2 -2.2L9 0L2.2 2.2L0 9L-2.2 2.2L-9 0L-2.2 -2.2Z"/>
+    <clipPath id="candleClip"><rect x="195" y="138" width="10" height="84" rx="2"/></clipPath>
+  </defs>
+
+  <!-- lantai + hiasan -->
+  <g class="bgl">
+    <rect x="-3000" y="378" width="6400" height="2400" fill="#a8dcf2"/>
+    <g fill="none" stroke="#1b3a57" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <use href="#star" x="64" y="214"/><use href="#star" x="338" y="244"/>
+      <circle cx="40" cy="262" r="4"/><circle cx="360" cy="196" r="4"/>
+    </g>
+  </g>
+
+  <!-- kardus (belakang) -->
+  <g class="layer" data-k="boxb">
+    <ellipse cx="200" cy="508" rx="150" ry="14" fill="#1b3a57" opacity=".14"/>
+    <!-- pita kuning -->
+    <path d="M40 345C-6 300 50 262 22 214C6 184 54 170 62 140" fill="none" stroke="#1b3a57" stroke-width="17" stroke-linecap="round"/>
+    <path d="M40 345C-6 300 50 262 22 214C6 184 54 170 62 140" fill="none" stroke="#f6ec7a" stroke-width="11" stroke-linecap="round"/>
+    <path d="M360 345C406 300 350 262 378 214C394 184 346 170 338 140" fill="none" stroke="#1b3a57" stroke-width="17" stroke-linecap="round"/>
+    <path d="M360 345C406 300 350 262 378 214C394 184 346 170 338 140" fill="none" stroke="#f6ec7a" stroke-width="11" stroke-linecap="round"/>
+    <!-- tutup terbuka -->
+    <path class="o" fill="#3a97cf" d="M100 398L108 336L36 306L14 358Z"/>
+    <path class="o" fill="#3a97cf" d="M300 398L292 336L364 306L386 358Z"/>
+    <path class="o" fill="#5cb8e8" d="M108 338L292 338L312 262L88 262Z"/>
+    <path class="o" fill="#2a7db3" d="M104 338L296 338L300 398L100 398Z"/>
+  </g>
+
+  <!-- lapisan dasar -->
+  <g class="layer" data-k="base">
+    <path class="o" fill="#7fbccb" d="M100 352L100 402A100 18 0 0 0 300 402L300 352Z"/>
+    <ellipse class="o" cx="200" cy="352" rx="100" ry="18" fill="#a7d9e4"/>
+    <g fill="#cdebf3">
+      <use href="#swirl" x="104" y="396"/><use href="#swirl" x="128" y="405"/><use href="#swirl" x="152" y="411"/>
+      <use href="#swirl" x="176" y="415"/><use href="#swirl" x="200" y="416"/><use href="#swirl" x="224" y="415"/>
+      <use href="#swirl" x="248" y="411"/><use href="#swirl" x="272" y="405"/><use href="#swirl" x="296" y="396"/>
+    </g>
+  </g>
+
+  <!-- krim di antara layer -->
+  <g class="layer" data-k="row">
+    <g fill="#e3f4f8">
+      <use href="#swirl" x="122" y="340"/><use href="#swirl" x="141" y="347"/><use href="#swirl" x="160" y="352"/>
+      <use href="#swirl" x="180" y="355"/><use href="#swirl" x="200" y="356"/><use href="#swirl" x="220" y="355"/>
+      <use href="#swirl" x="240" y="352"/><use href="#swirl" x="259" y="347"/><use href="#swirl" x="278" y="340"/>
+    </g>
+  </g>
+
+  <!-- layer kue tengah -->
+  <g class="layer" data-k="mid">
+    <path class="o" fill="#c3f3fb" d="M118 255L118 340A82 16 0 0 0 282 340L282 255Z"/>
+    <ellipse class="o" cx="200" cy="255" rx="82" ry="16" fill="#e4fcff"/>
+  </g>
+
+  <!-- icing biru atas -->
+  <g class="layer" data-k="top">
+    <path class="o" fill="#8fe0ea" d="M124 232V262Q124 280 140 278Q152 276 156 264Q160 256 168 268Q176 288 190 276Q198 268 204 262Q212 256 218 268Q226 284 242 278Q254 272 256 264Q262 256 268 266Q276 276 276 262V232Z"/>
+    <ellipse class="o" cx="200" cy="232" rx="76" ry="18" fill="#a9ecf3"/>
+  </g>
+
+  <!-- krim putih di atas -->
+  <g class="layer" data-k="cream">
+    <g>
+      <use href="#swirl" fill="#fffdf5" x="132" y="222"/>
+      <use href="#swirl" fill="#f8ecc9" x="146" y="212"/>
+      <use href="#swirl" fill="#fffdf5" x="168" y="207"/>
+      <use href="#swirl" fill="#f8ecc9" x="200" y="205"/>
+      <use href="#swirl" fill="#fffdf5" x="232" y="207"/>
+      <use href="#swirl" fill="#f8ecc9" x="254" y="212"/>
+      <use href="#swirl" fill="#fffdf5" x="268" y="222"/>
+      <use href="#swirl" fill="#f8ecc9" x="256" y="233"/>
+      <use href="#swirl" fill="#fffdf5" x="232" y="239"/>
+      <use href="#swirl" fill="#f8ecc9" x="200" y="241"/>
+      <use href="#swirl" fill="#fffdf5" x="168" y="239"/>
+      <use href="#swirl" fill="#f8ecc9" x="144" y="233"/>
+    </g>
+  </g>
+
+  <!-- lilin (topper) -->
+  <g class="layer" data-k="candle">
+    <circle id="glow" cx="200" cy="112" r="38" fill="#ffd45a"/>
+    <rect class="o" x="195" y="138" width="10" height="84" rx="2" fill="#5db0e6"/>
+    <path clip-path="url(#candleClip)" d="M190 160L210 148M190 178L210 166M190 196L210 184M190 214L210 202M190 232L210 220M190 142L210 130" stroke="#fff" stroke-width="4" fill="none"/>
+    <rect x="195" y="138" width="10" height="84" rx="2" fill="none" stroke="#1b3a57" stroke-width="2.2"/>
+    <path class="o ln" d="M200 138L200 129"/>
+    <g transform="translate(200 128)">
+      <g class="flame" id="flame">
+        <path class="o" fill="#ff8a3d" d="M0 -32C9 -18 12 -7 0 4C-12 -7 -9 -18 0 -32Z"/>
+        <path fill="#ffd45a" d="M0 -17C5 -10 6 -5 0 0C-6 -5 -5 -10 0 -17Z"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- cherry -->
+  <g class="layer" data-k="cherries">
+    <g id="cherryGroup"></g>
+  </g>
+
+  <!-- kardus (depan) -->
+  <g class="layer" data-k="boxf">
+    <path class="o" fill="#46a7da" d="M84 398L316 398L302 502L98 502Z"/>
+    <path class="o" fill="#2f8ac4" d="M84 398L316 398L313 414L87 414Z"/>
+    <path class="o" fill="#f6ec7a" d="M186 398H214L213 502H187Z"/>
+  </g>
+
+  <!-- korek api -->
+  <g id="match" style="opacity:0" transform="translate(390 40) rotate(-30)">
+    <rect class="o" x="0" y="-2.5" width="48" height="5" rx="2" fill="#d9a35b"/>
+    <circle class="o" cx="0" cy="0" r="5.5" fill="#e0392b"/>
+  </g>
+</svg>
+
+<div class="spr" id="spr"></div>
+
+<!-- ===================== TEKS ===================== -->
+<header class="hero" id="hero">
+  <small>Kamu diundang ke</small>
+  <h1>Ilham<br>Bday Party 🎉</h1>
+</header>
+
+<section class="panel" id="p1">
+  <p>Hai spap! Ada kejutan ulang tahun buat kamu. Buka kotaknya yuk!</p>
+  <button class="btn primary" id="btnStart" type="button">Buka Undangan ✨</button>
+</section>
+
+<section class="panel" id="p2">
+  <h2>Pilih Waktu ⏰</h2>
+  <p>Tanggal 13 nanti, kamu mau sesi yang mana?</p>
+  <div class="row">
+    <button class="btn" type="button" data-time="Siang">☀️ Siang</button>
+    <button class="btn" type="button" data-time="Malam">🌙 Malam</button>
+  </div>
+</section>
+
+<section class="panel" id="p3">
+  <h2>Nonton Apa Kita? 🎬</h2>
+  <p>Ketik film yang pengen kamu tonton bareng aku:</p>
+  <input type="text" id="movieInput" placeholder="Contoh: Dilan 1991" autocomplete="off" maxlength="60">
+  <button class="btn primary" id="btnMovie" type="button">Simpan Pilihan 📌</button>
+</section>
+
+<section class="panel" id="p4">
+  <h2>Deal! Ini Rencana Kita 🤝</h2>
+  <p>Tanggal 13, sesi:</p>
+  <div class="chip" id="rTime"></div>
+  <p>Film pilihanmu:</p>
+  <div class="chip" id="rMovie"></div>
+  <button class="btn primary" id="btnRundown" type="button">Lihat Rundown 📋</button>
+</section>
+
+<section class="panel" id="p5">
+  <h2>Rundown Acara 📅</h2>
+  <ul class="rundown">
+    <li>💬 1. Gusip gusip</li>
+    <li>🎂 2. Tiup lilin</li>
+    <li>🍿 3. Nonton film</li>
+    <li>🗣️ 4. Gusip gusip</li>
+  </ul>
+  <p style="margin-bottom:12px">Sampai ketemu, spap! ❤️</p>
+  <button class="btn primary" id="btnSend" type="button">Kirim Jawaban 💌</button>
+</section>
+
+<script>
+(() => {
+  // ====== PENGATURAN ======
+  // Nomor WhatsApp kamu, format internasional tanpa + / 0 di depan. Contoh: 6281234567890
+  const WA_NUMBER = "628XXXXXXXXXX";
+  // ========================
+
+  const $ = s => document.querySelector(s);
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const svg = $('#scene');
+  const NS = 'http://www.w3.org/2000/svg';
+
+  // ---------- cherry (digambar lewat JS biar rapi) ----------
+  (function buildCherries() {
+    const g = $('#cherryGroup');
+    // [x, y, arah batang]
+    [[143,216,-1],[168,204,-1],[186,224,-1],[214,222,1],[238,205,1],[259,216,1]].forEach(([x, y, s]) => {
+      const stem = document.createElementNS(NS, 'path');
+      stem.setAttribute('class', 'o ln');
+      stem.setAttribute('d', `M${x} ${y-13}C${x+s*2} ${y-30} ${x+s*10} ${y-44} ${x+s*12} ${y-56}`);
+      const body = document.createElementNS(NS, 'circle');
+      body.setAttribute('class', 'o'); body.setAttribute('cx', x); body.setAttribute('cy', y); body.setAttribute('r', 14);
+      body.setAttribute('fill', '#ff7c6c');
+      const hi = document.createElementNS(NS, 'ellipse');
+      hi.setAttribute('cx', x-5); hi.setAttribute('cy', y-5); hi.setAttribute('rx', 3.6); hi.setAttribute('ry', 2.4);
+      hi.setAttribute('fill', '#ffc2b8');
+      g.append(stem, body, hi);
+    });
+  })();
+
+  // ---------- layer ----------
+  const layers = {};
+  document.querySelectorAll('.layer').forEach(g => layers[g.dataset.k] = g);
+  const bgls = document.querySelectorAll('.bgl');
+  const ORDER  = ['candle','cherries','cream','top','mid','row','base','boxb','boxf'];
+  const OFFSET = { candle:-100, cherries:-84, cream:-56, top:-28, mid:0, row:20, base:42, boxb:80, boxf:80 };
+
+  function explode(on) {
+    ORDER.forEach((k, i) => {
+      const g = layers[k];
+      g.style.transitionDelay = ((on ? i : ORDER.length - 1 - i) * 0.05) + 's';
+      g.style.transform = on ? `translateY(${OFFSET[k]}px)` : 'translateY(0px)';
+    });
+  }
+  function focus(keys) {
+    ORDER.forEach(k => {
+      layers[k].style.transitionDelay = '0s';
+      layers[k].classList.toggle('dim', !!keys && !keys.includes(k));
+    });
+    bgls.forEach(b => b.classList.toggle('dim', !!keys));
+  }
+  const setBg = c => { document.body.style.backgroundColor = c; };
+
+  // ---------- kamera (animasi viewBox -> selalu tajam) ----------
+  const vw = () => innerWidth, vh = () => innerHeight;
+  const CAM = {
+    start:  () => ({ cx:200, cy:318, z:Math.min(vw()*.95/340, vh()*.46/370), sy:.47 }),
+    ex:     () => ({ cx:200, cy:292, z:Math.min(vw()*.95/330, vh()*.56/580), sy:.40 }),
+    cherry: () => ({ cx:200, cy:105, z:Math.min(vw()*.95/120, vh()*.55/105), sy:.30 }),
+    cream:  () => ({ cx:200, cy:166, z:Math.min(vw()*.95/170, vh()*.50/90),  sy:.30 }),
+    layer:  () => ({ cx:200, cy:272, z:Math.min(vw()*.95/190, vh()*.50/175), sy:.30 }),
+    final:  () => ({ cx:200, cy:298, z:Math.min(vw()*.95/340, vh()*.46/370)*.8, sy:.31 })
+  };
+  let camName = 'start';
+  const cam = CAM.start();
+  let raf = 0;
+  function draw() {
+    const w = vw(), h = vh();
+    svg.setAttribute('viewBox', `${cam.cx - w/2/cam.z} ${cam.cy - cam.sy*h/cam.z} ${w/cam.z} ${h/cam.z}`);
+  }
+  const easeIO = k => k < .5 ? 4*k*k*k : 1 - Math.pow(-2*k + 2, 3) / 2;
+  function fly(name, ms = 1200) {
+    camName = name;
+    const to = CAM[name](), from = { ...cam };
+    cancelAnimationFrame(raf);
+    return new Promise(res => {
+      const t0 = performance.now();
+      const step = now => {
+        const k = Math.min(1, (now - t0) / ms), e = easeIO(k);
+        cam.cx = from.cx + (to.cx - from.cx) * e;
+        cam.cy = from.cy + (to.cy - from.cy) * e;
+        cam.sy = from.sy + (to.sy - from.sy) * e;
+        cam.z  = from.z * Math.pow(to.z / from.z, e);
+        draw();
+        if (k < 1) raf = requestAnimationFrame(step); else res();
+      };
+      raf = requestAnimationFrame(step);
+    });
+  }
+  addEventListener('resize', () => { Object.assign(cam, CAM[camName]()); draw(); });
+  draw();
+
+  // ---------- panel ----------
+  const panels = document.querySelectorAll('.panel');
+  const showPanel = n => panels.forEach(p => p.classList.toggle('show', p.id === 'p' + n));
+  const hidePanels = () => panels.forEach(p => p.classList.remove('show'));
+
+  // ---------- sprinkle ----------
+  const spr = $('#spr');
+  function startSprinkles() {
+    spr.innerHTML = '';
+    const cols = ['#ff6b6b','#ffd93d','#6bcB77','#4d96ff','#c77dff','#ff9f68','#fff'];
+    for (let i = 0; i < 70; i++) {
+      const s = document.createElement('span');
+      s.style.left = (Math.random() * 100) + '%';
+      s.style.width = (4 + Math.random() * 3) + 'px';
+      s.style.height = (12 + Math.random() * 6) + 'px';
+      s.style.background = cols[i % cols.length];
+      s.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+      s.style.animationDuration = (2.4 + Math.random() * 2.2) + 's';
+      s.style.animationDelay = (Math.random() * 2.5) + 's';
+      spr.appendChild(s);
+    }
+    spr.classList.add('on');
+  }
+  function stopSprinkles() {
+    spr.classList.remove('on');
+    setTimeout(() => { if (!spr.classList.contains('on')) spr.innerHTML = ''; }, 700);
+  }
+
+  // ---------- korek api ----------
+  function anim(from, to, ms, fn) {
+    return new Promise(res => {
+      const t0 = performance.now();
+      (function s(now) {
+        const k = Math.min(1, (now - t0) / ms), e = easeIO(k);
+        fn(from.map((f, i) => f + (to[i] - f) * e));
+        if (k < 1) requestAnimationFrame(s); else res();
+      })(t0);
+    });
+  }
+  async function lightCandle() {
+    const m = $('#match');
+    const setM = ([x, y, a, o]) => { m.setAttribute('transform', `translate(${x} ${y}) rotate(${a})`); m.style.opacity = o; };
+    await anim([390, 40, -30, 0], [203, 131, -38, 1], 1000, setM);
+    await sleep(200);
+    $('#flame').classList.add('on');
+    $('#glow').classList.add('on');
+    await sleep(800);
+    await anim([203, 131, -38, 1], [270, 80, -20, 0], 800, setM);
+  }
+
+  // ---------- musik ----------
+  const bgm = $('#bgm'), musicBtn = $('#musicBtn');
+  function startMusic() {
+    bgm.volume = .8;
+    bgm.play().then(() => { musicBtn.textContent = '🎵 Musik: On'; })
+              .catch(() => { musicBtn.textContent = '🎵 Musik: Off'; });
+    musicBtn.style.display = 'block';
+  }
+  musicBtn.addEventListener('click', () => {
+    if (bgm.paused) { bgm.play(); musicBtn.textContent = '🎵 Musik: On'; }
+    else { bgm.pause(); musicBtn.textContent = '🎵 Musik: Off'; }
+  });
+
+  // ---------- alur halaman ----------
+  const data = { time: '', movie: '' };
+  let busy = false;
+
+  async function toPage2() {                       // kardus -> kue terpisah -> zoom cherry
+    if (busy) return; busy = true;
+    hidePanels(); $('#hero').classList.add('hide');
+    startMusic();
+    explode(true);
+    await fly('ex', 1100);
+    await sleep(250);
+    setBg('#e0392f');
+    focus(['cherries']);
+    await fly('cherry', 1400);
+    showPanel(2); busy = false;
+  }
+
+  async function toPage3(time) {                   // zoom out -> zoom in ke krim + hujan sprinkle
+    if (busy) return; busy = true;
+    data.time = time;
+    hidePanels();
+    await sleep(250);
+    focus(null);
+    await fly('ex', 900);
+    setBg('#fff3dc');
+    focus(['cream']);
+    startSprinkles();
+    await fly('cream', 1300);
+    showPanel(3); busy = false;
+  }
+
+  async function toPage4() {                       // zoom out -> zoom in ke layer kue
+    if (busy) return;
+    const input = $('#movieInput');
+    const val = input.value.trim();
+    if (!val) {
+      input.classList.remove('error'); void input.offsetWidth; input.classList.add('error');
+      input.placeholder = 'Isi dulu ya, spap 🥺';
+      return;
+    }
+    busy = true;
+    data.movie = val;
+    $('#rTime').textContent = (data.time === 'Siang' ? '☀️ ' : '🌙 ') + data.time;
+    $('#rMovie').textContent = '🎬 ' + val;
+    hidePanels(); input.blur();
+    stopSprinkles();
+    await sleep(250);
+    focus(null);
+    await fly('ex', 900);
+    setBg('#9fd9ee');
+    focus(['top', 'mid']);
+    await fly('layer', 1300);
+    showPanel(4); busy = false;
+  }
+
+  async function toPage5() {                       // zoom out -> kue utuh -> nyalakan lilin
+    if (busy) return; busy = true;
+    hidePanels();
+    await sleep(250);
+    focus(null);
+    await fly('ex', 900);
+    setBg('#cdeefb');
+    explode(false);
+    await fly('final', 1400);
+    await sleep(300);
+    await lightCandle();
+    showPanel(5); busy = false;
+  }
+
+  function sendToWhatsApp() {
+    const msg = 'Hai! Aku konfirmasi ya buat Bday Party tanggal 13 🎂\n' +
+                'Sesi: ' + data.time + '\n' +
+                'Film: ' + data.movie + '\n' +
+                'Sampai ketemu! ❤️';
+    window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
+  }
+
+  $('#btnStart').addEventListener('click', toPage2);
+  document.querySelectorAll('[data-time]').forEach(b => b.addEventListener('click', () => toPage3(b.dataset.time)));
+  $('#btnMovie').addEventListener('click', toPage4);
+  $('#movieInput').addEventListener('keydown', e => { if (e.key === 'Enter') toPage4(); });
+  $('#btnRundown').addEventListener('click', toPage5);
+  $('#btnSend').addEventListener('click', sendToWhatsApp);
+
+  setTimeout(() => showPanel(1), 400);
+})();
+</script>
+</body>
+</html>
